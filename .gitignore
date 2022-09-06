@@ -1,0 +1,10 @@
+data/
+weight/
+logs/
+log/
+.vscode/
+__pycache__/
+*.pt
+*.mtx
+*.pickle
+*.txt
