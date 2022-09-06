@@ -1,7 +1,5 @@
 data/
 weight/
-logs/
-log/
 .vscode/
 __pycache__/
 *.pt
