@@ -102,12 +102,6 @@ def testing(config):
         for p in f.parameters():
             p.requires_grad = False
         f.eval()
-        f_lap = ModelPartitioning(config.pe_params).to(device)
-        f_lap.load_state_dict(torch.load(config.pe_savepath))
-        f_lap.eval()
-        for p in f_lap.parameters():
-            p.requires_grad = False
-        f_lap.eval()
         dataset = []
         for d in config.loader:
             d = d.to(device)
@@ -118,6 +112,12 @@ def testing(config):
                 torch.sqrt(torch.tensor(x.shape[0]))
             dataset.append(Data(x=x,edge_index=d.edge_index))
         loader = DataLoader(dataset,batch_size=1,shuffle=False)
+        f_lap = ModelPartitioning(config.pe_params).to(device)
+        f_lap.load_state_dict(torch.load(config.pe_savepath))
+        f_lap.eval()
+        for p in f_lap.parameters():
+            p.requires_grad = False
+        f_lap.train()
         for d in loader:
             d = d.to(device)
             data = f_lap(d)
@@ -138,10 +138,12 @@ if __name__ == '__main__':
 
     # data: all or only one
     # data = 'all'
-    data = 'nv1'
+    data = 'radiation'
+    init_plot = False
 
     # 删除文件，用断点删除 , mode = 'all in folder','file','folder'
-    remove_file_or_folder('log/'+data,mode='all in folder')
+    if init_plot:
+        remove_file_or_folder('log/'+data,mode='all in folder')
 
     # config
     config  = config_gap(data=data,batch_size=1,mode='train')
@@ -163,7 +165,7 @@ if __name__ == '__main__':
     # partitioning embdding optimizer == pm_opt(dict)(lr,weight_decay)
     config.pe_opt = {'lr':0.001,'weight_decay':5e-6}
     # whether to run spectral embedding
-    config.is_se = True
+    config.is_se = False
     # whether to run partitiong embedding 
     config.is_pe = True
     config.se_params = {'l':32,'pre':2,'post':2,'coarsening_threshold':2,'activation':'tanh','lins':[16,32,32,16,16]}
