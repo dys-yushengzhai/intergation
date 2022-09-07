@@ -77,7 +77,7 @@ def mixed_dataset(data='all',binary_weight=True,batch_size=1):
                 col = adj.col
                 rowcols = np.array([row,col])
                 edges = torch.tensor(rowcols,dtype=torch.long)
-                nodes = torch.randn(adj.shape[0],2)
+                nodes = torch.ones(adj.shape[0],2)
                 dataset.append(Data(x=nodes, edge_index=edges))
             loader = DataLoader(dataset,batch_size=batch_size,shuffle=False)
 

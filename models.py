@@ -4,6 +4,7 @@ from layers import *
 from torch_geometric.nn import  avg_pool, graclus
 from torch_geometric.data import Batch
 from layers import SAGEConv
+import pickle
 
 
 # Neural network for the embedding module
@@ -37,7 +38,7 @@ class ModelSpectral(torch.nn.Module):
             cluster = graclus(edge_index,num_nodes=x.shape[0])
             cluster_info.append(cluster)
             edge_info.append(edge_index)
-            gc = avg_pool(cluster, Batch(batch=batch, x=x, edge_index=edge_index))
+            gc = avg_pool(cluster, Batch(batch=batch, x=x, edge_index=edge_index,shuffle=False))
             x, edge_index, batch = gc.x, gc.edge_index, gc.batch
         # coarse iterations
         x=torch.eye(2).to(self.device)
@@ -46,7 +47,8 @@ class ModelSpectral(torch.nn.Module):
         while edge_info:
             # un-pooling / interpolation / prolongation / refinement
             edge_index = edge_info.pop()
-            output, inverse = torch.unique(cluster_info.pop(), return_inverse=True)
+            cluster = cluster_info.pop()
+            output, inverse = torch.unique(cluster, return_inverse=True)
             x = x[inverse]
             # post-smoothing
             for i in range(self.post):

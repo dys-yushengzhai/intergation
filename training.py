@@ -12,6 +12,9 @@ from utils_file.utils import *
 from torch_geometric.loader import DataLoader
 from torch_geometric.data import Data
 from torch.utils.tensorboard import SummaryWriter
+import pickle
+
+torch.set_printoptions(precision=32)
 
 def train(config):
     device = config.device
@@ -131,14 +134,19 @@ def testing(config):
 
 if __name__ == '__main__':
     # Seeds
-    torch.manual_seed(176364)
+    # torch.manual_seed(176364)
+    # np.random.seed(453658)
+    # random.seed(41884)
+    # torch.cuda.manual_seed(9597121)
+
+    torch.manual_seed(1763)
     np.random.seed(453658)
     random.seed(41884)
     torch.cuda.manual_seed(9597121)
 
     # data: all or only one
     # data = 'all'
-    data = 'radiation'
+    data = 'imagesensor'
     init_plot = False
 
     # 删除文件，用断点删除 , mode = 'all in folder','file','folder'
@@ -167,7 +175,7 @@ if __name__ == '__main__':
     # whether to run spectral embedding
     config.is_se = False
     # whether to run partitiong embedding 
-    config.is_pe = True
+    config.is_pe = False
     config.se_params = {'l':32,'pre':2,'post':2,'coarsening_threshold':2,'activation':'tanh','lins':[16,32,32,16,16]}
     config.pe_params = {'l':32,'pre':4,'post':4,'coarsening_threshold':2,'activation':'tanh','lins':[16,16,16,16,16]}
     config.se_epoch = 100
