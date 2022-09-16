@@ -39,6 +39,9 @@ def train(config):
                     loss.backward()
                     optimizer.step()
                     print('Epoch:',i,'   Loss:',loss)
+                    # if i==config.se_epoch-1:
+                    #     with open('x_features_epoch_'+str(config.se_epoch)+'.pickle','wb') as f:
+                    #         pickle.dump(x,f)
             print('End training')
             print('')
 
@@ -82,7 +85,7 @@ def train(config):
                     print('cut: ',cuts)
                     print('ia: ',len(ia))
                     print('ib: ',len(ib))
-                    loss = loss_fn(data,d)
+                    loss = loss_fn(data,d,config.hyper_para_loss)
                     optimizer.zero_grad()
                     loss.backward()
                     optimizer.step()
@@ -124,12 +127,12 @@ def testing(config):
         for d in loader:
             d = d.to(device)
             data = f_lap(d)
-            _,_,_,cuts,t,ia,ib,ic,id = best_part(data,d,2)
+            _,_,_,cuts,t,ias,ibs,ia,ib= best_part(data,d,2)
             print('cut: ',cuts)
             print('ia: ',max(len(ia),len(ib)))
             print('ib: ',min(len(ia),len(ib)))
             print('balance: ',max(len(ia),len(ib))/min(len(ia),len(ib)))
-        
+         
 
 
 if __name__ == '__main__':
@@ -173,12 +176,13 @@ if __name__ == '__main__':
     # partitioning embdding optimizer == pm_opt(dict)(lr,weight_decay)
     config.pe_opt = {'lr':0.001,'weight_decay':5e-6}
     # whether to run spectral embedding
-    config.is_se = False
+    config.is_se = True
     # whether to run partitiong embedding 
-    config.is_pe = False
+    config.is_pe = True
+    config.hyper_para_loss = 0
     config.se_params = {'l':32,'pre':2,'post':2,'coarsening_threshold':2,'activation':'tanh','lins':[16,32,32,16,16]}
     config.pe_params = {'l':32,'pre':4,'post':4,'coarsening_threshold':2,'activation':'tanh','lins':[16,16,16,16,16]}
-    config.se_epoch = 100
+    config.se_epoch = 80
     config.pe_epoch = 60
     config.se_savepath = 'spectral_weights/spectral_weights_'+config.data+'.pt'
     config.pe_savepath  = 'partitioning_weights/partitioning_weights_'+config.data+'.pt'
@@ -191,6 +195,11 @@ if __name__ == '__main__':
     testing(config)
     writer.close()
     
-
-
-     
+# 50 0.00100930733606219291687011718750 14145
+# 51 0.00118701963219791650772094726562 15200
+# 60 0.00139058567583560943603515625000 16823
+# 80 0.00110348907765001058578491210938 8196
+# 100 0.00130757794249802827835083007812 8810.0
+# 150 0.00154331908561289310455322265625 11242.0
+# 108 0.00088301947107538580894470214844 11737.0
+# 200 0.00127180945128202438354492187500 9620.0

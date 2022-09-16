@@ -17,6 +17,7 @@ from collections import Counter
 import pymetis
 import os
 import shutil
+import gc
 
 def input_matrix():
     '''
@@ -228,7 +229,7 @@ def from_adjacency_matrix_to_adjacency_list(adjacency_matrix):
 
     return dict_list
 
-def to_continuous_natural_number(adjacent_matrix):
+def to_continuous_natural_number_and_is_connected(adjacent_matrix):
     """1 3 5 5 5 to 0 1 2 2 2
 
     Args:
@@ -250,12 +251,9 @@ def to_continuous_natural_number(adjacent_matrix):
     
     row = torch.tensor([dict_continuous_number[row[i]] for i in range(len(row))])
     col = torch.tensor([dict_continuous_number[col[i]] for i in range(len(col))])
-    indices = torch.vstack((row,col))
-    
-    continuous_sparse_matrix = torch.sparse_coo_tensor(indices, adjacent_matrix.storage._value)
+    is_connected = ((degree(row,num_nodes=adjacent_matrix.sparse_size(dim=0)))==0.).any()
 
-    return st.from_torch_sparse_coo_tensor(continuous_sparse_matrix)
-
+    return st.from_edge_index(edge_index=torch.vstack((row,col)),edge_attr=adjacent_matrix.storage._value),is_connected
 # def edge_cut_test(A,y):
 
 #     if isinstance(A, torch.Tensor):
@@ -322,6 +320,8 @@ def best_part(data, graph, n_times):
     vols = []
     preds = []
     cuts = []
+    ias =[]
+    ibs = [] 
     t0 = timeit.default_timer()
     graph_ev = data
     t1 = timeit.default_timer() - t0
@@ -338,7 +338,9 @@ def best_part(data, graph, n_times):
     cuts.append(cut)
     vols.append((vola, volb))
     preds.append(predictions)
-    for i in range(1, n_times):
+    ias.append(ia)
+    ibs.append(ib)
+    for i in range(n_times):
         t0_loop = timeit.default_timer()
         graph_ev = data
         t1_loop = timeit.default_timer() - t0_loop
@@ -349,8 +351,11 @@ def best_part(data, graph, n_times):
         vols.append((vola, volb))
         preds.append(predictions)
         cuts.append(cut)
+        ias.append(ic)
+        ibs.append(id)
     min_nc = np.argmin(ncuts)
-    return ncuts[min_nc], vols[min_nc], preds[min_nc], cuts[min_nc], t1 + t1_loop,ia,ib,ic,id
+    min_c = np.argmin(cuts)
+    return ncuts[min_c], vols[min_c], preds[min_c], cuts[min_c], t1 + t1_loop,ias[min_c],ibs[min_c],ia,ib
 
 
 def torch_from_preds(graph, preds):

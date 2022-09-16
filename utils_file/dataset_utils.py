@@ -58,9 +58,8 @@ def mixed_dataset(data='all',binary_weight=True,batch_size=1):
         else:
             adj = mmread(os.path.expanduser('data/suitesparse'+'/'+data+'.mtx'))
             adj = torch_sparse.remove_diag(st.from_scipy(adj)).to_symmetric()
-            adj = to_continuous_natural_number(adj)
-            g = nx.Graph(st.to_scipy(adj,layout='coo'))
-            if nx.is_connected(g):
+            adj,is_connected = to_continuous_natural_number_and_is_connected(adj)
+            if not is_connected:
                 if binary_weight:
                     adj = st.set_value(adj, torch.ones_like(adj.storage._value),layout='coo')
                     dataset_list.append(adj)

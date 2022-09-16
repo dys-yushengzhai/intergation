@@ -30,6 +30,8 @@ class config_gap:
             self.se_epoch = 200
             self.pe_epoch = 200
             self.se_savepath = 'spectral_weights/spectral_weights_ss1.pt'
+            self.pe_savepath = 'partitioning_weights/partitioning_weights_ss1.pt'
+            self.hyper_para_loss = 0
         elif self.model=="spectral graph embedding" and self.mode=='test':
             pass  
 
