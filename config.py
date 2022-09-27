@@ -7,9 +7,9 @@ from torch_geometric.loader import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
 class config_gap:
-    def __init__(self,data='ss1',batch_size=1,mode = 'train',is_plot=False):
+    def __init__(self,data='ss1',batch_size=1,mode = 'train',is_plot=False,n_max=500,n_min=100):
         self.model = "spectral for graph embedding"
-        self.loader,self.dataset = mixed_dataset(data,batch_size=batch_size)
+        self.loader = mixed_dataset(data,batch_size=batch_size,n_max=n_max,n_min=n_min)
         self.data = data
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.mode = mode
@@ -31,9 +31,10 @@ class config_gap:
             self.pe_epoch = 200
             self.se_savepath = 'spectral_weights/spectral_weights_ss1.pt'
             self.pe_savepath = 'partitioning_weights/partitioning_weights_ss1.pt'
-            self.hyper_para_loss = 0
+            self.hyper_para_loss_normalized_cut = 0
         elif self.model=="spectral graph embedding" and self.mode=='test':
-            pass  
+            self.se_test_save_path = 'spectral_weights/spectral_weights_ss1.pt'
+            self.pe_test_save_path = 'partitioning_weights/partitioning_weights_ss1.pt'
 
 
 # device = 'cpu'

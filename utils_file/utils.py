@@ -18,6 +18,7 @@ import pymetis
 import os
 import shutil
 import gc
+from torch_sparse import SparseTensor
 
 def input_matrix():
     '''
@@ -251,7 +252,7 @@ def to_continuous_natural_number_and_is_connected(adjacent_matrix):
     
     row = torch.tensor([dict_continuous_number[row[i]] for i in range(len(row))])
     col = torch.tensor([dict_continuous_number[col[i]] for i in range(len(col))])
-    is_connected = ((degree(row,num_nodes=adjacent_matrix.sparse_size(dim=0)))==0.).any()
+    is_connected = ((degree(row,row[-1]+1))==0.).any()
 
     return st.from_edge_index(edge_index=torch.vstack((row,col)),edge_attr=adjacent_matrix.storage._value),is_connected
 # def edge_cut_test(A,y):
@@ -417,3 +418,22 @@ def remove_file_or_folder(path,mode='file'):
             print(str(result)+' , '+'Deleting fails')
     else:
         print('no mode')
+
+def print_message(data,mode,config):
+    if mode=='train' and data=='all':
+        print('')
+        print('Number of SuiteSparse of train: ',int(len(config.loader)/3))
+
+    else :
+        for d in config.loader:
+            graph = SparseTensor(row=d.edge_index[0],col=d.edge_index[1],value=torch.ones_like(d.edge_index[0],dtype=torch.float64))
+            config.baseline,config.balance = pymetis_baseline(graph)
+            print('data: ',graph)
+            print('')
+            print('The number of nodes: ',graph.storage._sparse_sizes[0])
+            print('The number of edges: ',int(graph.storage._row.shape[0]/2))
+            print('')
+            print('metis cuts: ',config.baseline)
+            print('metis balance: ',config.balance)
+    print('')
+    print('model: ',config.model)
