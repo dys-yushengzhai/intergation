@@ -41,7 +41,7 @@ def train(config):
                         d = d.to(device)
                         L = laplacian(d).to(device)
                         x = f(d)
-                        loss += loss_fn(x,L)/update
+                        loss += loss_fn(x,L,config.hyper_para_loss_embedding)/update
                         j+=1
                         if j%update.item()==0 or j==len(config.loader):
                             optimizer.zero_grad()
@@ -60,7 +60,7 @@ def train(config):
                         d = d.to(device)
                         L = laplacian(d).to(device)
                         x = f(d)
-                        loss = loss_fn(x,L)
+                        loss = loss_fn(x,L,config.hyper_para_loss_embedding)
                         optimizer.zero_grad()
                         loss.backward()
                         optimizer.step()
@@ -227,11 +227,11 @@ if __name__ == '__main__':
     # data = 'all'
     # NotreDame_actors 卡主
     data_train = 'all'
-    data_test = 'largebasis'
+    data_test = 'offshore'
     data = data_train if mode=='train' else data_test
 
     # the constraint of the nodes of graph
-    n_max = 1000000000
+    n_max = 5000000
     n_min = 100
 
     # model
@@ -261,12 +261,13 @@ if __name__ == '__main__':
     # whether to run spectral embedding
     config.is_se = False
     # whether to run partitiong embedding 
-    config.is_pe = True
-    config.hyper_para_loss_normalized_cut = 0.1
+    config.is_pe = False
+    config.hyper_para_loss_embedding = 1
+    config.hyper_para_loss_normalized_cut = 0
     config.se_params = {'l':32,'pre':2,'post':2,'coarsening_threshold':2,'activation':'tanh','lins':[16,32,32,16,16]}
     config.pe_params = {'l':32,'pre':4,'post':4,'coarsening_threshold':2,'activation':'tanh','lins':[16,16,16,16,16]}
-    config.se_epoch = 120
-    config.pe_epoch = 150
+    config.se_epoch = 120 # 120 80(0.001)
+    config.pe_epoch = 150 # 150 # 100(0.0005)
     config.se_train_savepath = 'spectral_weights/spectral_weights_'+data_train+'.pt'
     config.pe_train_savepath  = 'partitioning_weights/partitioning_weights_'+data_train+'.pt'
     config.se_test_savepath = 'spectral_weights/spectral_weights_'+data_test+'.pt'

@@ -310,8 +310,8 @@ def laplacian(graph):
     return torch.sparse.mm(Dinv,L)
 
 # Computes the sum of the eigenvector residual and the eigenvalue related to the vector x
-def residual(x,L,mse):
-    return mse(L.matmul(x),rayleigh_quotient(x,L)*x)+rayleigh_quotient(x,L)
+def residual(x,L,mse,Lambda):
+    return mse(L.matmul(x),rayleigh_quotient(x,L)*x)+Lambda * rayleigh_quotient(x,L)
 
 def rayleigh_quotient(x,L):
     return (torch.t(x).matmul(L.matmul(x))/(torch.t(x).matmul(x)))
